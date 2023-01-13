@@ -15,7 +15,7 @@ const HomeScreen = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log("user = " + JSON.stringify(user));
+  // console.log("user = " + JSON.stringify(user));
 
   function goProfile() {
     navigation.navigate("Profile");
@@ -26,7 +26,6 @@ const HomeScreen = () => {
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
       const { profilePic, username } = doc.data();
-      console.log("profile", profilePic);
       setUserAvatarUrl(profilePic);
     });
   }
@@ -35,7 +34,7 @@ const HomeScreen = () => {
     if (!user) return;
     setIsLoading(true);
     const UserRef = collection(db, "Users");
-    const queryResult = query(UserRef, where("email", "==", user.email));
+    const queryResult = query(UserRef, where("userId", "==", user.uid));
 
     DocFinder(queryResult);
     setIsLoading(false);

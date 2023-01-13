@@ -11,10 +11,11 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/config";
+import { auth, db } from "../../firebase/config";
 const backImage = require("../../assets/background_signin.jpg");
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
+import { addDoc, collection } from "firebase/firestore";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -30,13 +31,22 @@ export default function Login() {
     );
   }
 
+  // uid
   // const { height, width } = useWindowDimensions();
 
   const onHandleLogin = () => {
     if (email !== "" && password !== "") {
       setIsLoading(true);
       signInWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Login success"), setIsLoading(false))
+        .then(
+          async (res) =>
+            await addDoc(collection(db, "Users"), {
+              userId: res.user.uid,
+              email: res.user.email,
+              username: res.user.email.split("@")[0],
+            }),
+          setIsLoading(false)
+        )
         .catch(
           (err) => Alert.alert("Login error", err.message),
           setIsLoading(false)

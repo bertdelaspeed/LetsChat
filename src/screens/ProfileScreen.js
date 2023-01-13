@@ -29,7 +29,7 @@ const ProfileScreen = () => {
   const storage = getStorage();
 
   const [image, setImage] = useState(null);
-  const [userImageUrl, setUserImageUrl] = useState("");
+  const [userImageUrl, setUserImageUrl] = useState(null);
   const [username, setUsername] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -39,8 +39,8 @@ const ProfileScreen = () => {
   );
   const navigation = useNavigation();
 
-  console.log("context user = " + JSON.stringify(user));
-  console.log("user image url =", userImageUrl);
+  // console.log("context user = " + JSON.stringify(user));
+  // console.log("user image url =", userImageUrl);
 
   async function DocFinder(queryResult) {
     const querySnapshot = await getDocs(queryResult);
@@ -70,13 +70,11 @@ const ProfileScreen = () => {
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [5, 4],
       quality: 1,
     });
-
-    // console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
@@ -87,44 +85,22 @@ const ProfileScreen = () => {
   };
 
   const uploadImage = async () => {
-    const metadata = {
-      contentType: "image/jpeg",
-    };
+    // console.log("inside upload image");
+
     const response = await fetch(image);
     const blob = await response.blob();
     const filename = image.substring(image.lastIndexOf("/") + 1);
     const imageRef = ref(storage, `ProfilePictures/${filename}`);
-    uploadBytes(imageRef, blob, metadata).then(async () => {
+    uploadBytes(imageRef, blob).then(async () => {
+      // console.log("upload bytes");
       const downloadURL = await getDownloadURL(imageRef);
-      console.log("download url in UPLOAD Image = " + downloadURL);
-      if (!userImageUrl) {
-        console.log("if no user image url");
+      // console.log("download url in UPLOAD Image = " + downloadURL);
+      if (userImageUrl === undefined) {
+        // console.log("if no user image url");
         setUserImageUrl(downloadURL);
 
-        if (username == "") {
-          await addDoc(collection(db, "Users"), {
-            userId: user.uid,
-            profilePic: downloadURL,
-            username: user.displayName,
-            email: user.email,
-          });
-        } else {
-          const UserRef = collection(db, "Users");
-          const queryResult = query(UserRef, where("email", "==", user.uid));
-
-          const querySnapshot = await getDocs(queryResult);
-          querySnapshot.forEach((document) => {
-            updateDoc(doc(db, "Users", document.id), {
-              profilePic: downloadURL,
-            }).then(() => {
-              setUserImageUrl(downloadURL);
-            });
-          });
-        }
-      } else {
-        console.log("if THERE IS user image url");
         const UserRef = collection(db, "Users");
-        const queryResult = query(UserRef, where("email", "==", user.uid));
+        const queryResult = query(UserRef, where("userId", "==", user.uid));
 
         const querySnapshot = await getDocs(queryResult);
         querySnapshot.forEach((document) => {
@@ -137,29 +113,6 @@ const ProfileScreen = () => {
       }
     });
   };
-
-  const HandleUpdate = async () => {
-    if (username !== "") {
-      setIsLoading(true);
-      const UserRef = collection(db, "Users");
-      const queryResult = query(UserRef, where("userId", "==", user.uid));
-
-      const querySnapshot = await getDocs(queryResult);
-      querySnapshot.forEach((document) => {
-        // doc.data() is never undefined for query doc snapshots
-        // console.log("UPDATE FUNCTION \n", document.id, " => ", document.data());
-        updateDoc(doc(db, "Users", document.id), {
-          username: username,
-        }).then(() => {
-          setUsername;
-          setIsLoading(false);
-        });
-      });
-    }
-
-    setImage(null);
-  };
-  // console.log("username = ", username);
 
   const HandleSignOut = () => {
     signOut(auth)
@@ -183,30 +136,23 @@ const ProfileScreen = () => {
       </View>
       <TouchableOpacity
         onPress={pickImage}
-        className="h-40 w-40 bg-gray-400 rounded-full items-center justify-center mt-5 mx-auto mb-10"
+        className="rounded-md bg-gray-400 items-center justify-center mx-10 mb-10"
       >
-        {userImageUrl === "" ? (
+        {userImageUrl === undefined ? (
           <Ionicons name="ios-camera-outline" size={50} color="white" />
         ) : (
           <Image
             source={{ uri: userImageUrl }}
-            className="h-36 w-36 rounded-full"
+            className="h-40 w-full rounded-md"
           />
         )}
       </TouchableOpacity>
       <View></View>
 
       <View className="items-center">
-        <TextInput
-          className="tracking-widest bg-gray-200 rounded-lg w-80 text-base py-2 px-1 mx-3 mb-5"
-          placeholder="Enter username"
-          autoCapitalize="none"
-          keyboardType="default"
-          textContentType="username"
-          // autoFocus={true}
-          value={username}
-          onChangeText={(text) => setUsername(text)}
-        />
+        <Text className="tracking-widest bg-gray-200 rounded-lg w-80 text-base py-2 px-1 mx-3 mb-5 text-slate-900 font-light">
+          {username}
+        </Text>
         <Text className="tracking-widest bg-gray-200 rounded-lg w-80 text-base py-2 px-1 mx-3 mb-5 text-slate-900 font-light">
           {userEmail}
         </Text>
@@ -219,14 +165,6 @@ const ProfileScreen = () => {
         </View>
       )}
       <View>
-        <TouchableOpacity
-          onPress={HandleUpdate}
-          className="bg-green-500 py-2 rounded-md mx-10 mt-16 mb-3"
-        >
-          <Text className="text-center font-semibold text-white text-lg ">
-            Update
-          </Text>
-        </TouchableOpacity>
         <TouchableOpacity
           onPress={HandleSignOut}
           className="bg-[#fac25a] py-2 rounded-md mx-20 mt-16 mb-3"
