@@ -47,6 +47,7 @@ const SearchToChatScreen = () => {
     <View className="bg-gray-200 flex-1">
       <View className="flex-row items-center  content-center my-3 mx-3 mb-10">
         <TextInput
+          onSubmitEditing={HandleSearch}
           className="tracking-widest bg-gray-100 rounded-lg w-80 text-base py-2 px-1 mx-3 "
           placeholder="Rechercher "
           autoCapitalize="none"

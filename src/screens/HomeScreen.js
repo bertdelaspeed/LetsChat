@@ -30,6 +30,7 @@ const HomeScreen = () => {
     });
   }
 
+  console.log("user avatar url = ", userAvatarUrl);
   useEffect(() => {
     if (!user) return;
     setIsLoading(true);
@@ -38,7 +39,7 @@ const HomeScreen = () => {
 
     DocFinder(queryResult);
     setIsLoading(false);
-  }, []);
+  }, [user, userAvatarUrl]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
