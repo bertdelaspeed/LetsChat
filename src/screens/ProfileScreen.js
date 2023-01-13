@@ -3,7 +3,6 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  TextInput,
   ActivityIndicator,
   ScrollView,
 } from "react-native";
@@ -13,7 +12,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { AuthenticatedUserContext } from "../../Context/Authentication";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
-  addDoc,
   collection,
   getDocs,
   query,

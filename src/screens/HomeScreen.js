@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { AuthenticatedUserContext } from "../../Context/Authentication";
 import { useNavigation } from "@react-navigation/native";
@@ -60,13 +60,13 @@ const HomeScreen = () => {
   }, []);
 
   return (
-    <View className="bg-black">
-      <View style={styles.container}>
+    <View className="flex flex-row-reverse absolute bottom-14 right-5">
+      <View>
         <TouchableOpacity
-          onPress={() => navigation.navigate("Profile")}
-          style={styles.chatButton}
+          onPress={() => navigation.navigate("Search")}
+          className="bg-orange-500 h-16 w-16 rounded-full text-center items-center justify-center "
         >
-          <Entypo name="chat" size={24} color="#FAFAFA" />
+          <Entypo name="chat" size={30} color="white" />
         </TouchableOpacity>
       </View>
     </View>
@@ -74,29 +74,3 @@ const HomeScreen = () => {
 };
 
 export default HomeScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    backgroundColor: "#fff",
-  },
-  chatButton: {
-    backgroundColor: "#f57c00",
-    height: 50,
-    width: 50,
-    borderRadius: 25,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#f57c00",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.9,
-    shadowRadius: 8,
-    marginRight: 20,
-    marginBottom: 50,
-  },
-});

@@ -11,6 +11,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase/config";
+import SearchToChatScreen from "./src/screens/SearchToChatScreen";
+import ChatScreen from "./src/screens/ChatScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -27,7 +29,6 @@ function RootNavigator() {
       }
     });
   }, [user]);
-  // console.log("USER VALUE AT APP.JS = ", user);
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -61,6 +62,12 @@ function MainStack() {
         component={ProfileScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="Search"
+        component={SearchToChatScreen}
+        options={{ title: "Avec Qui Chatter" }}
+      />
+      <Stack.Screen name="Chat" component={ChatScreen} />
     </Stack.Navigator>
   );
 }
