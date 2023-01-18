@@ -63,7 +63,7 @@ const ProfileScreen = () => {
 
     DocFinder(queryResult);
     setIsLoading(false);
-  }, [username, userImageUrl]);
+  }, [username, userImageUrl, image]);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library

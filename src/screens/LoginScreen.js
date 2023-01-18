@@ -38,15 +38,9 @@ export default function Login() {
     if (email !== "" && password !== "") {
       setIsLoading(true);
       signInWithEmailAndPassword(auth, email, password)
-        .then(
-          async (res) =>
-            await addDoc(collection(db, "Users"), {
-              userId: res.user.uid,
-              email: res.user.email,
-              username: res.user.email.split("@")[0],
-            }),
-          setIsLoading(false)
-        )
+        .then(() => {
+          console.log("Login success");
+        })
         .catch(
           (err) => Alert.alert("Login error", err.message),
           setIsLoading(false)

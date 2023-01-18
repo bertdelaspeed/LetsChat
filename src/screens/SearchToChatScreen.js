@@ -11,6 +11,8 @@ import { SimpleLineIcons } from "@expo/vector-icons";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { useNavigation } from "@react-navigation/native";
+const squirrel = require("../../assets/squirrel-no-bg.png");
+const userAvatar = require("../../assets/man.png");
 
 const SearchToChatScreen = () => {
   const navigation = useNavigation();
@@ -19,11 +21,13 @@ const SearchToChatScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchedFriendAvatar, setSearchedFriendAvatar] = useState(null);
   const [searchedFriendName, setSearchedFriendName] = useState(null);
+  const [found, setFound] = useState(false);
 
   const HandleSearch = async () => {
     if (searchFriend !== "") {
       setSearchedFriendAvatar(null);
       setSearchedFriendName(null);
+
       setIsLoading(true);
       console.log(searchFriend);
       const UserRef = collection(db, "Users");
@@ -33,12 +37,19 @@ const SearchToChatScreen = () => {
       );
       const querySnapshot = await getDocs(queryResult);
 
-      querySnapshot.forEach((document) => {
-        const { profilePic, username } = document.data();
-        setSearchedFriendAvatar(profilePic);
+      console.log("result = " + querySnapshot.empty);
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach((document) => {
+          const { profilePic, username } = document.data();
 
-        setSearchedFriendName(username);
-      });
+          setSearchedFriendAvatar(profilePic);
+          setSearchedFriendName(username);
+          setFound(true);
+        });
+      } else {
+        setFound(false);
+      }
+
       setIsLoading(false);
     }
   };
@@ -64,24 +75,38 @@ const SearchToChatScreen = () => {
         </TouchableOpacity>
       </View>
       {isLoading && <ActivityIndicator size={"large"} color="gray" />}
-      {searchedFriendAvatar && searchedFriendName ? (
+      {found ? (
         <TouchableOpacity
-          onPress={() => navigation.navigate("Chat")}
+          onPress={() =>
+            navigation.navigate("Chat", {
+              friendName: searchedFriendName,
+              friendAvatar: searchedFriendAvatar,
+            })
+          }
           className="mx-6"
         >
           <View className="flex-row items-center space-x-4 bg-gray-100 px-2 py-2 rounded-lg">
-            <Image
-              source={{ uri: searchedFriendAvatar }}
-              className="h-14 w-14 rounded-full"
-            />
+            {searchedFriendAvatar !== undefined ? (
+              <Image
+                source={{ uri: searchedFriendAvatar }}
+                className="h-12 w-12 rounded-full"
+              />
+            ) : (
+              <Image source={userAvatar} className="h-12 w-12 rounded-full" />
+            )}
             <Text className="font-bold tracking-widest text-lg">
               {searchedFriendName}
             </Text>
           </View>
         </TouchableOpacity>
       ) : (
-        <View className="mx-6 text-center">
-          <Text>Not found</Text>
+        <View className="mx-6 items-center">
+          {!found && (
+            <>
+              <Image source={squirrel} className="h-auto w-auto " />
+              <Text className="text-3xl">Not found</Text>
+            </>
+          )}
         </View>
       )}
     </View>

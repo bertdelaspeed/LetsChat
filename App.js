@@ -67,7 +67,11 @@ function MainStack() {
         component={SearchToChatScreen}
         options={{ title: "Avec Qui Chatter" }}
       />
-      <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={{ headerTitle: "" }}
+      />
     </Stack.Navigator>
   );
 }

@@ -31,22 +31,21 @@ const HomeScreen = () => {
   }
 
   console.log("user avatar url = ", userAvatarUrl);
+
   useEffect(() => {
     if (!user) return;
-    setIsLoading(true);
     const UserRef = collection(db, "Users");
     const queryResult = query(UserRef, where("userId", "==", user.uid));
 
     DocFinder(queryResult);
-    setIsLoading(false);
-  }, [user, userAvatarUrl]);
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity onPress={goProfile}>
           <View className="w-10 h-10  items-center ">
-            {userAvatarUrl === null ? (
+            {!userAvatarUrl ? (
               <Image source={userAvatar} className="h-10 w-10 rounded-full" />
             ) : (
               <Image
@@ -58,7 +57,7 @@ const HomeScreen = () => {
         </TouchableOpacity>
       ),
     });
-  }, []);
+  }, [userAvatarUrl]);
 
   return (
     <View className="flex flex-row-reverse absolute bottom-14 right-5">

@@ -9,10 +9,11 @@ import {
   Alert,
 } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/config";
+import { auth, db } from "../../firebase/config";
 const backImage = require("../../assets/background_signup.jpg");
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
+import { addDoc, collection } from "firebase/firestore";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,15 @@ export default function Signup() {
   const onHandleSignup = () => {
     if (email !== "" && password !== "") {
       createUserWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Signup success"), navigation.navigate("Login"))
+        .then(
+          async (res) =>
+            await addDoc(collection(db, "Users"), {
+              userId: res.user.uid,
+              email: res.user.email,
+              username: res.user.email.split("@")[0],
+            }),
+          navigation.navigate("Login")
+        )
         .catch((err) => Alert.alert("Login error", err.message));
     }
   };
