@@ -6,7 +6,13 @@ import {
   TextInput,
   FlatList,
 } from "react-native";
-import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -36,6 +42,8 @@ const ChatScreen = () => {
   const sender = user.email.split("@")[0];
 
   const [messages, setMessages] = useState([]);
+  const flatListRef = useRef(null);
+  const [isListReady, setIsListReady] = useState(false);
 
   useEffect(() => {
     const chatRef = collection(db, "Chats");
@@ -65,11 +73,11 @@ const ChatScreen = () => {
     };
     const unsub1 = onSnapshot(queryResult, (snapshot) => {
       const allMessages = snapshot.docs.map((doc) => doc.data().conversation);
-      setMessages(allMessages.reverse());
+      setMessages(allMessages);
     });
     const unsub2 = onSnapshot(queryResult2, (snapshot) => {
       const allMessages = snapshot.docs.map((doc) => doc.data().conversation);
-      setMessages(allMessages.reverse());
+      setMessages(allMessages);
     });
     fetchMessages();
     return () => {
@@ -77,6 +85,10 @@ const ChatScreen = () => {
       unsub2();
     };
   }, []);
+
+  useEffect(() => {
+    setIsListReady(true);
+  }, [messages]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -181,54 +193,60 @@ const ChatScreen = () => {
     setMessage("");
   };
 
-  console.log("messages are : ", messages);
-
   return (
     <View style={{ flex: 1 }}>
-      <FlatList
-        inverted={true}
-        data={messages[0]}
-        keyExtractor={(item) => item.timestamp?.seconds.toString()}
-        renderItem={({ item }) => (
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent:
-                item.sender === sender ? "flex-end" : "flex-start",
-              padding: 10,
-            }}
-          >
+      {messages[0] !== undefined && (
+        <FlatList
+          initialNumToRender={5}
+          ref={flatListRef}
+          onContentSizeChange={() => {
+            if (isListReady) {
+              flatListRef?.current?.scrollToEnd({ animated: true });
+            }
+          }}
+          data={messages[0]}
+          keyExtractor={(item) => item.timestamp}
+          renderItem={({ item }) => (
             <View
               style={{
-                backgroundColor: item.sender === sender ? "#dcf8c6" : "#fff",
+                flexDirection: "row",
+                justifyContent:
+                  item.sender === sender ? "flex-end" : "flex-start",
                 padding: 10,
-                borderRadius: 10,
-                maxWidth: "80%",
-                marginRight: 10,
-                marginLeft: 10,
               }}
             >
-              <Text
+              <View
                 style={{
-                  color: item.sender === sender ? "black" : "black",
-                  fontWeight: "500",
-                  marginBottom: 3,
+                  backgroundColor: item.sender === sender ? "#dcf8c6" : "#fff",
+                  padding: 10,
+                  borderRadius: 10,
+                  maxWidth: "80%",
+                  marginRight: 10,
+                  marginLeft: 10,
                 }}
               >
-                {item.sender}
-              </Text>
-              <Text
-                style={{
-                  color: item.sender === sender ? "black" : "black",
-                  fontWeight: "500",
-                }}
-              >
-                {item.message}
-              </Text>
+                <Text
+                  style={{
+                    color: item.sender === sender ? "black" : "black",
+                    fontWeight: "500",
+                    marginBottom: 3,
+                  }}
+                >
+                  {item.sender}
+                </Text>
+                <Text
+                  style={{
+                    color: item.sender === sender ? "black" : "black",
+                    fontWeight: "500",
+                  }}
+                >
+                  {item.message}
+                </Text>
+              </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
       <View className="flex-row mb-5 items-center mx-3 space-x-3">
         <TextInput
           className="bg-white rounded-xl p-2 flex-1 focus:outline-none focus:shadow-outline-blue text-gray-700 h-12"
