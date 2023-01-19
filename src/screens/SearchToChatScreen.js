@@ -33,7 +33,8 @@ const SearchToChatScreen = () => {
       const UserRef = collection(db, "Users");
       const queryResult = query(
         UserRef,
-        where("username", "==", searchFriend.trim())
+        where("username", ">=", searchFriend.trim()),
+        where("username", "<=", searchFriend.trim() + "\uf8ff")
       );
       const querySnapshot = await getDocs(queryResult);
 
@@ -56,10 +57,10 @@ const SearchToChatScreen = () => {
 
   return (
     <View className="bg-gray-200 flex-1">
-      <View className="flex-row items-center  content-center my-3 mx-3 mb-10">
+      <View className={`flex-row items-center content-center my-3 mx-3 mb-10`}>
         <TextInput
           onSubmitEditing={HandleSearch}
-          className="tracking-widest bg-gray-100 rounded-lg w-80 text-base py-2 px-1 mx-3 "
+          className={`tracking-widest bg-gray-100 rounded-lg text-base py-2 px-1 mx-2 w-[85%]`}
           placeholder="Rechercher "
           autoCapitalize="none"
           keyboardType="default"

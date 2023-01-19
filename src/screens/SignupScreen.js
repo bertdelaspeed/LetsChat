@@ -47,12 +47,13 @@ export default function Signup() {
         </Text>
         <View className="mt-10 items-center">
           <TextInput
+            onSubmitEditing={onHandleSignup}
             className="tracking-widest bg-gray-100 rounded-lg w-80 text-base py-2 px-1 mx-3 mb-5"
             placeholder="Enter email"
             autoCapitalize="none"
             keyboardType="email-address"
             textContentType="emailAddress"
-            // autoFocus={true}
+            autoFocus={true}
             value={email}
             onChangeText={(text) => setEmail(text)}
           />

@@ -83,16 +83,17 @@ const ProfileScreen = () => {
   };
 
   const uploadImage = async () => {
-    // console.log("inside upload image");
+    console.log("inside upload image");
 
     const response = await fetch(image);
     const blob = await response.blob();
     const filename = image.substring(image.lastIndexOf("/") + 1);
+    console.log("filename = " + filename);
     const imageRef = ref(storage, `ProfilePictures/${filename}`);
     uploadBytes(imageRef, blob).then(async () => {
-      // console.log("upload bytes");
+      console.log("upload bytes");
       const downloadURL = await getDownloadURL(imageRef);
-      // console.log("download url in UPLOAD Image = " + downloadURL);
+      console.log("download url in UPLOAD Image = " + downloadURL);
       if (userImageUrl === undefined) {
         // console.log("if no user image url");
         setUserImageUrl(downloadURL);

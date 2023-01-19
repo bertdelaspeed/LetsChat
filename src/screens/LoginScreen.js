@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StatusBar,
   Alert,
-  useWindowDimensions,
   ActivityIndicator,
 } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -15,7 +14,6 @@ import { auth, db } from "../../firebase/config";
 const backImage = require("../../assets/background_signin.jpg");
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
-import { addDoc, collection } from "firebase/firestore";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -59,6 +57,7 @@ export default function Login() {
         </Text>
         <View className="mt-10 items-center">
           <TextInput
+            onSubmitEditing={onHandleLogin}
             className="tracking-widest bg-gray-100 rounded-lg w-80 text-base py-2 px-1 mx-3 mb-5"
             placeholder="Enter email"
             autoCapitalize="none"

@@ -139,9 +139,7 @@ const ChatScreen = () => {
     );
 
     const querySnapshot = await getDocs(queryResult);
-    console.log("query snapshot 1 is empty : ", querySnapshot.empty);
     const querySnapshot2 = await getDocs(queryResult2);
-    console.log("query snapshot 2 is empty : ", querySnapshot2.empty);
 
     if (!querySnapshot.empty || !querySnapshot2.empty) {
       querySnapshot.forEach((document) => {
@@ -155,9 +153,7 @@ const ChatScreen = () => {
             },
           ],
         })
-          .then(() => {
-            console.log("Chat message added to existing chat!");
-          })
+          .then(() => {})
           .catch((err) => console.log(err));
       });
       querySnapshot2.forEach((document) => {
@@ -171,9 +167,7 @@ const ChatScreen = () => {
             },
           ],
         })
-          .then(() => {
-            console.log("Chat message added to existing chat!");
-          })
+          .then(() => {})
           .catch((err) => console.log(err));
       });
     } else {
@@ -187,7 +181,6 @@ const ChatScreen = () => {
           },
         ],
       });
-      console.log("New chat created!");
     }
 
     setMessage("");
@@ -247,7 +240,7 @@ const ChatScreen = () => {
           )}
         />
       )}
-      <View className="flex-row mb-5 items-center mx-3 space-x-3">
+      <View className="flex-row mb-5 items-center mx-3 space-x-3 absolute bottom-0">
         <TextInput
           className="bg-white rounded-xl p-2 flex-1 focus:outline-none focus:shadow-outline-blue text-gray-700 h-12"
           placeholder="Type your message here..."

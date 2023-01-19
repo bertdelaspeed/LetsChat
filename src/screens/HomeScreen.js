@@ -1,8 +1,21 @@
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { AuthenticatedUserContext } from "../../Context/Authentication";
 import { useNavigation } from "@react-navigation/native";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
 import { db } from "../../firebase/config";
 const userAvatar = require("../../assets/man.png");
 import { Entypo } from "@expo/vector-icons";
@@ -13,9 +26,11 @@ const HomeScreen = () => {
     AuthenticatedUserContext
   );
 
-  const [isLoading, setIsLoading] = useState(false);
+  const username = user.email.split("@")[0];
 
-  // console.log("user = " + JSON.stringify(user));
+  const [friends, setFriends] = useState([]);
+  const [friendAvatar, setFriendAvatar] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   function goProfile() {
     navigation.navigate("Profile");
@@ -25,15 +40,14 @@ const HomeScreen = () => {
     const querySnapshot = await getDocs(queryResult);
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
-      const { profilePic, username } = doc.data();
+      const { profilePic } = doc.data();
       setUserAvatarUrl(profilePic);
     });
   }
 
-  console.log("user avatar url = ", userAvatarUrl);
-
   useEffect(() => {
     if (!user) return;
+
     const UserRef = collection(db, "Users");
     const queryResult = query(UserRef, where("userId", "==", user.uid));
 
@@ -59,17 +73,112 @@ const HomeScreen = () => {
     });
   }, [userAvatarUrl]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    setIsLoading(true);
+    const FetchMatch = async () => {
+      const chatRef = collection(db, "Chats");
+      const queryResult = query(
+        chatRef,
+        where("chatters", ">=", `${username}`),
+        where("chatters", "<=", `${username}` + "\uf8ff")
+      );
+
+      const queryResult2 = query(
+        chatRef,
+        where("chatters", "<=", `xx${username}`)
+      );
+
+      let friendsArray = [];
+
+      const unsubscribe = onSnapshot(queryResult, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          // doc.data() is never undefined for query doc snapshots
+          if (doc.data().chatters.includes(username)) {
+            const chats = doc.data().chatters;
+            const friends = chats.replace(username, "").replace("xx", "");
+            friendsArray.push(friends);
+            friendsArray = [...new Set(friendsArray)];
+            setFriends(friendsArray);
+          }
+        });
+      });
+
+      const unsubscribe2 = onSnapshot(queryResult2, (querySnapshot2) => {
+        querySnapshot2.forEach((doc) => {
+          // doc.data() is never undefined for query doc snapshots
+          if (doc.data().chatters.includes(username)) {
+            const chats = doc.data().chatters;
+            const friends = chats.replace(username, "").replace("xx", "");
+            friendsArray.push(friends);
+            friendsArray = [...new Set(friendsArray)];
+            setFriends(friendsArray);
+          }
+        });
+      });
+
+      return () => {
+        unsubscribe();
+        unsubscribe2();
+      };
+    };
+
+    FetchMatch();
+    setIsLoading(false);
+  }, []);
+
   return (
-    <View className="flex flex-row-reverse absolute bottom-14 right-5">
-      <View>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Search")}
-          className="bg-orange-500 h-16 w-16 rounded-full text-center items-center justify-center "
-        >
-          <Entypo name="chat" size={30} color="white" />
-        </TouchableOpacity>
+    <>
+      {isLoading ? (
+        <View className="flex items-center justify-center h-full">
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : (
+        <FlatList
+          data={friends}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("Chat", {
+                  friendName: item,
+                  friendAvatar: friendAvatar,
+                })
+              }
+              className="mx-3"
+            >
+              <View className="flex-row items-center space-x-4 bg-white my-2 px-2 py-2 rounded-lg">
+                {friendAvatar !== null ? (
+                  <Image
+                    source={{ uri: friendAvatar }}
+                    className="h-12 w-12 rounded-full"
+                  />
+                ) : (
+                  <Image
+                    source={userAvatar}
+                    className="h-12 w-12 rounded-full"
+                  />
+                )}
+                <Text className="font-bold tracking-widest text-lg">
+                  {item}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      )}
+      <View className="flex flex-row-reverse absolute bottom-14 right-5">
+        <View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Search")}
+            className="bg-orange-500 h-16 w-16 rounded-full text-center items-center justify-center "
+          >
+            <Entypo name="chat" size={30} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </>
   );
 };
 
