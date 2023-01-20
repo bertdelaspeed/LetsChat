@@ -71,7 +71,7 @@ const HomeScreen = () => {
         </TouchableOpacity>
       ),
     });
-  }, [userAvatarUrl]);
+  }, [userAvatarUrl, navigation]);
 
   useEffect(() => {
     if (!user) return;
@@ -147,7 +147,7 @@ const HomeScreen = () => {
               }
               className="mx-3"
             >
-              <View className="flex-row items-center space-x-4 bg-white my-2 px-2 py-2 rounded-lg">
+              <View className="flex-row items-center space-x-4 bg-white my-3 px-2 py-2 rounded-lg">
                 {friendAvatar !== null ? (
                   <Image
                     source={{ uri: friendAvatar }}

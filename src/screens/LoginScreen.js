@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../../firebase/config";
+import { auth } from "../../firebase/config";
 const backImage = require("../../assets/background_signin.jpg");
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
@@ -28,9 +28,6 @@ export default function Login() {
       </View>
     );
   }
-
-  // uid
-  // const { height, width } = useWindowDimensions();
 
   const onHandleLogin = () => {
     if (email !== "" && password !== "") {

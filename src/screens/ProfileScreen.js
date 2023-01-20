@@ -5,6 +5,7 @@ import {
   Image,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -37,16 +38,12 @@ const ProfileScreen = () => {
   );
   const navigation = useNavigation();
 
-  // console.log("context user = " + JSON.stringify(user));
-  // console.log("user image url =", userImageUrl);
-
   async function DocFinder(queryResult) {
     const querySnapshot = await getDocs(queryResult);
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
       if (userEmail === "") {
         const { email, profilePic, username } = doc.data();
-        // console.log("emmail = ", email, "profile", profilePic);
         setUserEmail(email);
         setUserImageUrl(profilePic);
         setUserAvatarUrl(profilePic);
@@ -57,12 +54,10 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     if (!user) return;
-    setIsLoading(true);
     const UserRef = collection(db, "Users");
     const queryResult = query(UserRef, where("email", "==", user.email));
 
     DocFinder(queryResult);
-    setIsLoading(false);
   }, [username, userImageUrl, image]);
 
   const pickImage = async () => {
@@ -76,26 +71,25 @@ const ProfileScreen = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      if (image) {
-        uploadImage();
-      }
+
+      uploadImage();
     }
   };
 
   const uploadImage = async () => {
-    console.log("inside upload image");
+    try {
+      console.log("inside upload image");
 
-    const response = await fetch(image);
-    const blob = await response.blob();
-    const filename = image.substring(image.lastIndexOf("/") + 1);
-    console.log("filename = " + filename);
-    const imageRef = ref(storage, `ProfilePictures/${filename}`);
-    uploadBytes(imageRef, blob).then(async () => {
-      console.log("upload bytes");
-      const downloadURL = await getDownloadURL(imageRef);
-      console.log("download url in UPLOAD Image = " + downloadURL);
-      if (userImageUrl === undefined) {
-        // console.log("if no user image url");
+      setIsLoading(true);
+      const response = await fetch(image);
+      const blob = await response.blob();
+      const filename = image.substring(image.lastIndexOf("/") + 1);
+      console.log("filename = " + filename);
+      const imageRef = ref(storage, `ProfilePictures/${filename}`);
+      uploadBytes(imageRef, blob).then(async () => {
+        console.log("upload bytes");
+        const downloadURL = await getDownloadURL(imageRef);
+        console.log("download url in UPLOAD Image = " + downloadURL);
         setUserImageUrl(downloadURL);
 
         const UserRef = collection(db, "Users");
@@ -107,10 +101,14 @@ const ProfileScreen = () => {
             profilePic: downloadURL,
           }).then(() => {
             setUserImageUrl(downloadURL);
+            setUserAvatarUrl(downloadURL);
+            setIsLoading(false);
           });
         });
-      }
-    });
+      });
+    } catch (error) {
+      Alert.alert(error.message);
+    }
   };
 
   const HandleSignOut = () => {
@@ -120,9 +118,12 @@ const ProfileScreen = () => {
         navigation.navigate("Login");
       })
       .catch((error) => {
-        console.log(error);
+        Alert.alert(error.message);
       });
   };
+
+  console.log("is loading = " + isLoading);
+
   return (
     <ScrollView>
       <View className="justify-center items-center my-10">
@@ -139,6 +140,8 @@ const ProfileScreen = () => {
       >
         {userImageUrl === undefined ? (
           <Ionicons name="ios-camera-outline" size={50} color="white" />
+        ) : isLoading ? (
+          <ActivityIndicator size="large" color="white" />
         ) : (
           <Image
             source={{ uri: userImageUrl }}
@@ -160,7 +163,7 @@ const ProfileScreen = () => {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <ActivityIndicator size="large" color="gray" />
+          <Text>PATIENTER ...</Text>
         </View>
       )}
       <View>
