@@ -34,7 +34,7 @@ export default function Login() {
       setIsLoading(true);
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-          console.log("Login success");
+          // console.log("Login success");
         })
         .catch(
           (err) => Alert.alert("Login error", err.message),

@@ -25,7 +25,7 @@ function RootNavigator() {
       if (user) {
         setUser(user);
       } else {
-        console.log("out !");
+        // console.log("out !");
       }
     });
   }, [user]);

@@ -218,23 +218,8 @@ const ChatScreen = () => {
                   marginLeft: 10,
                 }}
               >
-                <Text
-                  style={{
-                    color: item.sender === sender ? "black" : "black",
-                    fontWeight: "500",
-                    marginBottom: 3,
-                  }}
-                >
-                  {item.sender}
-                </Text>
-                <Text
-                  style={{
-                    color: item.sender === sender ? "black" : "black",
-                    fontWeight: "500",
-                  }}
-                >
-                  {item.message}
-                </Text>
+                <Text className="text-gray-500 text-sm ">{item.sender}</Text>
+                <Text className="text-gray-700 text-base">{item.message}</Text>
               </View>
             </View>
           )}

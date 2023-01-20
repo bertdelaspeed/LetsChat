@@ -29,7 +29,7 @@ const HomeScreen = () => {
   const username = user.email.split("@")[0];
 
   const [friends, setFriends] = useState([]);
-  const [friendAvatar, setFriendAvatar] = useState(null);
+  const [friendAvatar, setFriendAvatar] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   function goProfile() {
@@ -128,6 +128,31 @@ const HomeScreen = () => {
     setIsLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const getFriendsAvatar = async () => {
+      let avatarsArray = [];
+      const FriendRef = collection(db, "Users");
+      await Promise.all(
+        friends.map(async (friend) => {
+          const queryResult = query(FriendRef, where("username", "==", friend));
+          const querySnapshot = await getDocs(queryResult);
+          querySnapshot.forEach((doc) => {
+            const { profilePic } = doc.data();
+            avatarsArray.push({ name: friend, avatar: profilePic });
+          });
+        })
+      );
+      setFriendAvatar([...avatarsArray]);
+    };
+
+    if (friends.length > 0) {
+      getFriendsAvatar();
+    }
+  }, [friends]);
+
+  // console.log("friendAvatar = ", friendAvatar);
   return (
     <>
       {isLoading ? (
@@ -136,21 +161,21 @@ const HomeScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={friends}
+          data={friendAvatar}
           renderItem={({ item, index }) => (
             <TouchableOpacity
               onPress={() =>
                 navigation.navigate("Chat", {
-                  friendName: item,
-                  friendAvatar: friendAvatar,
+                  friendName: item.name,
+                  friendAvatar: item.avatar,
                 })
               }
               className="mx-3"
             >
-              <View className="flex-row items-center space-x-4 bg-white my-3 px-2 py-2 rounded-lg">
+              <View className="flex-row items-center space-x-4 bg-white my-2 px-2 py-2 rounded-lg">
                 {friendAvatar !== null ? (
                   <Image
-                    source={{ uri: friendAvatar }}
+                    source={{ uri: item.avatar }}
                     className="h-12 w-12 rounded-full"
                   />
                 ) : (
@@ -160,7 +185,7 @@ const HomeScreen = () => {
                   />
                 )}
                 <Text className="font-bold tracking-widest text-lg">
-                  {item}
+                  {item.name}
                 </Text>
               </View>
             </TouchableOpacity>

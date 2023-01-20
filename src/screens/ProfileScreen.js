@@ -78,18 +78,18 @@ const ProfileScreen = () => {
 
   const uploadImage = async () => {
     try {
-      console.log("inside upload image");
+      // console.log("inside upload image");
 
       setIsLoading(true);
       const response = await fetch(image);
       const blob = await response.blob();
       const filename = image.substring(image.lastIndexOf("/") + 1);
-      console.log("filename = " + filename);
+      // console.log("filename = " + filename);
       const imageRef = ref(storage, `ProfilePictures/${filename}`);
       uploadBytes(imageRef, blob).then(async () => {
-        console.log("upload bytes");
+        // console.log("upload bytes");
         const downloadURL = await getDownloadURL(imageRef);
-        console.log("download url in UPLOAD Image = " + downloadURL);
+        // console.log("download url in UPLOAD Image = " + downloadURL);
         setUserImageUrl(downloadURL);
 
         const UserRef = collection(db, "Users");
@@ -122,7 +122,7 @@ const ProfileScreen = () => {
       });
   };
 
-  console.log("is loading = " + isLoading);
+  // console.log("is loading = " + isLoading);
 
   return (
     <ScrollView>

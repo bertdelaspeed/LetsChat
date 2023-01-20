@@ -29,7 +29,7 @@ const SearchToChatScreen = () => {
       setSearchedFriendName(null);
 
       setIsLoading(true);
-      console.log(searchFriend);
+      // console.log(searchFriend);
       const UserRef = collection(db, "Users");
       const queryResult = query(
         UserRef,
@@ -38,7 +38,7 @@ const SearchToChatScreen = () => {
       );
       const querySnapshot = await getDocs(queryResult);
 
-      console.log("result = " + querySnapshot.empty);
+      // console.log("result = " + querySnapshot.empty);
       if (!querySnapshot.empty) {
         querySnapshot.forEach((document) => {
           const { profilePic, username } = document.data();
