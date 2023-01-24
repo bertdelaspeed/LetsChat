@@ -31,6 +31,7 @@ const HomeScreen = () => {
   const [friends, setFriends] = useState([]);
   const [friendAvatar, setFriendAvatar] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastMessage, setLastMessage] = useState([]);
 
   function goProfile() {
     navigation.navigate("Profile");
@@ -97,9 +98,14 @@ const HomeScreen = () => {
           // doc.data() is never undefined for query doc snapshots
           if (doc.data().chatters.includes(username)) {
             const chats = doc.data().chatters;
+
             const friends = chats.replace(username, "").replace("xx", "");
-            friendsArray.push(friends);
+            friendsArray.push({
+              friends,
+              lastMessage: doc.data().conversation.pop().message,
+            });
             friendsArray = [...new Set(friendsArray)];
+            // console.log("friends in sub1 = ", friends);
             setFriends(friendsArray);
           }
         });
@@ -114,6 +120,7 @@ const HomeScreen = () => {
             friendsArray.push(friends);
             friendsArray = [...new Set(friendsArray)];
             setFriends(friendsArray);
+            // console.log("friends in sub2 = ", friends);
           }
         });
       });
@@ -131,28 +138,71 @@ const HomeScreen = () => {
   useEffect(() => {
     if (!user) return;
 
-    const getFriendsAvatar = async () => {
-      let avatarsArray = [];
-      const FriendRef = collection(db, "Users");
-      await Promise.all(
-        friends.map(async (friend) => {
-          const queryResult = query(FriendRef, where("username", "==", friend));
-          const querySnapshot = await getDocs(queryResult);
-          querySnapshot.forEach((doc) => {
-            const { profilePic } = doc.data();
-            avatarsArray.push({ name: friend, avatar: profilePic });
-          });
-        })
-      );
-      setFriendAvatar([...avatarsArray]);
-    };
+    let avatarsArray = [];
+    let latestMessage = [];
+    const FriendRef = collection(db, "Users");
+    const ChatsRef = collection(db, "Chats");
+    const unsubscribe = friends.map((friend) => {
+      const queryResult = query(FriendRef, where("username", "==", friend));
+      const unsubFriend = onSnapshot(queryResult, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const { profilePic } = doc.data();
+          avatarsArray.push({ name: friend, avatar: profilePic });
+          setFriendAvatar([...avatarsArray]);
+        });
+      });
 
-    if (friends.length > 0) {
-      getFriendsAvatar();
-    }
+      const queryResult2 = query(
+        ChatsRef,
+        where("chatters", "==", `${username}xx${friend}`)
+      );
+
+      const queryResult3 = query(
+        ChatsRef,
+        where("chatters", "==", `${friend}xx${username}`)
+      );
+
+      const unsubChat = onSnapshot(queryResult2, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const conversation = doc.data().conversation;
+          let lastMessage = "";
+          if (conversation && conversation.length > 0) {
+            lastMessage = conversation[conversation.length - 1].message;
+          }
+          latestMessage.push({
+            chatters: doc.data().chatters,
+            message: lastMessage,
+          });
+          setLastMessage([...latestMessage]);
+        });
+      });
+
+      const unsubChat2 = onSnapshot(queryResult3, (querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const conversation = doc.data().conversation;
+          let lastMessage = "";
+          if (conversation && conversation.length > 0) {
+            lastMessage = conversation[conversation.length - 1].message;
+          }
+          latestMessage.push({
+            chatters: doc.data().chatters,
+            message: lastMessage,
+          });
+          setLastMessage([...latestMessage]);
+        });
+      });
+
+      return () => {
+        unsubFriend();
+        unsubChat();
+        unsubChat2();
+      };
+    });
+    return () => unsubscribe.forEach((unsub) => unsub());
   }, [friends]);
 
-  // console.log("friendAvatar = ", friendAvatar);
+  console.log("lastMessage = ", lastMessage);
+
   return (
     <>
       {isLoading ? (
@@ -184,9 +234,18 @@ const HomeScreen = () => {
                     className="h-12 w-12 rounded-full"
                   />
                 )}
-                <Text className="font-bold tracking-widest text-lg">
-                  {item.name}
-                </Text>
+                <View className="">
+                  <Text className="font-bold tracking-widest text-lg">
+                    {item.name}
+                  </Text>
+                  <Text className="text-gray-500 text-sm">
+                    {lastMessage.length > 0
+                      ? lastMessage.find((chat) =>
+                          chat.chatters.includes(item.name)
+                        )?.message
+                      : ""}
+                  </Text>
+                </View>
               </View>
             </TouchableOpacity>
           )}
