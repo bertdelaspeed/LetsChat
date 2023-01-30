@@ -31,10 +31,11 @@ import { db } from "../../firebase/config";
 import { AuthenticatedUserContext } from "../../Context/Authentication";
 import "firebase/firestore";
 const userAvatar = require("../../assets/man.png");
+import axios from "axios";
 
 const ChatScreen = () => {
   const route = useRoute();
-  const { friendName, friendAvatar } = route.params;
+  const { friendName, friendAvatar, friendEmail } = route.params;
   const navigation = useNavigation();
 
   const [message, setMessage] = useState("");
@@ -183,48 +184,60 @@ const ChatScreen = () => {
       });
     }
 
+    axios.post(`https://app.nativenotify.com/api/indie/notification`, {
+      subID: `${friendEmail}`,
+      appId: 6054,
+      appToken: "OLbw8pXPqXXjN0d24TdlsU",
+      title: `${sender} - LetsChat`,
+      message: `${message}`,
+    });
     setMessage("");
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      {messages[0] !== undefined && (
-        <FlatList
-          initialNumToRender={5}
-          ref={flatListRef}
-          onContentSizeChange={() => {
-            if (isListReady) {
-              flatListRef?.current?.scrollToEnd({ animated: true });
-            }
-          }}
-          data={messages[0]}
-          keyExtractor={(item) => item.timestamp}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent:
-                  item.sender === sender ? "flex-end" : "flex-start",
-                padding: 10,
-              }}
-            >
+    <View>
+      <View className="mb-20">
+        {messages[0] !== undefined && (
+          <FlatList
+            initialNumToRender={5}
+            ref={flatListRef}
+            onContentSizeChange={() => {
+              if (isListReady) {
+                flatListRef?.current?.scrollToEnd({ animated: true });
+              }
+            }}
+            data={messages[0]}
+            keyExtractor={(item) => item.timestamp}
+            renderItem={({ item }) => (
               <View
                 style={{
-                  backgroundColor: item.sender === sender ? "#dcf8c6" : "#fff",
+                  flexDirection: "row",
+                  justifyContent:
+                    item.sender === sender ? "flex-end" : "flex-start",
                   padding: 10,
-                  borderRadius: 10,
-                  maxWidth: "80%",
-                  marginRight: 10,
-                  marginLeft: 10,
                 }}
               >
-                <Text className="text-gray-500 text-sm ">{item.sender}</Text>
-                <Text className="text-gray-700 text-base">{item.message}</Text>
+                <View
+                  style={{
+                    backgroundColor:
+                      item.sender === sender ? "#dcf8c6" : "#fff",
+                    padding: 10,
+                    borderRadius: 10,
+                    maxWidth: "80%",
+                    marginRight: 10,
+                    marginLeft: 10,
+                  }}
+                >
+                  <Text className="text-gray-500 text-sm ">{item.sender}</Text>
+                  <Text className="text-gray-700 text-base">
+                    {item.message}
+                  </Text>
+                </View>
               </View>
-            </View>
-          )}
-        />
-      )}
+            )}
+          />
+        )}
+      </View>
       <View className="flex-row mb-5 items-center mx-3 space-x-3 absolute bottom-0">
         <TextInput
           className="bg-white rounded-xl p-2 flex-1 focus:outline-none focus:shadow-outline-blue text-gray-700 h-12"

@@ -14,6 +14,7 @@ import { auth } from "../../firebase/config";
 const backImage = require("../../assets/background_signin.jpg");
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
+import { registerIndieID } from "native-notify";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -34,7 +35,7 @@ export default function Login() {
       setIsLoading(true);
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
-          // console.log("Login success");
+          registerIndieID(`${email}`, 6054, "OLbw8pXPqXXjN0d24TdlsU");
         })
         .catch(
           (err) => Alert.alert("Login error", err.message),

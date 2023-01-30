@@ -8,17 +8,20 @@ import AuthenticatedUserProvider, {
 import HomeScreen from "./src/screens/HomeScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import React, { useContext, useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { Image } from "react-native";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase/config";
 import SearchToChatScreen from "./src/screens/SearchToChatScreen";
 import ChatScreen from "./src/screens/ChatScreen";
+const loadingGif = require("./assets/loading.gif");
+
+import registerNNPushToken from "native-notify";
 
 const Stack = createNativeStackNavigator();
 
 function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -27,20 +30,19 @@ function RootNavigator() {
       } else {
         // console.log("out !");
       }
+      setIsLoading(false);
     });
   }, [user]);
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
   return (
     <NavigationContainer>
-      {user ? <MainStack /> : <AuthStack />}
+      {!user && isLoading === true ? (
+        <Image source={loadingGif} className="h-full w-full" />
+      ) : !user && isLoading === false ? (
+        <AuthStack />
+      ) : (
+        <MainStack />
+      )}
     </NavigationContainer>
   );
 }
@@ -78,6 +80,7 @@ function MainStack() {
 }
 
 export default function App() {
+  registerNNPushToken(6054, "OLbw8pXPqXXjN0d24TdlsU");
   return (
     <AuthenticatedUserProvider>
       <RootNavigator />

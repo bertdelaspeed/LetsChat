@@ -19,6 +19,7 @@ import {
 import { db } from "../../firebase/config";
 const userAvatar = require("../../assets/man.png");
 import { Entypo } from "@expo/vector-icons";
+import ChatItem from "../components/ChatItem";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -77,7 +78,6 @@ const HomeScreen = () => {
   useEffect(() => {
     if (!user) return;
 
-    setIsLoading(true);
     const FetchMatch = async () => {
       const chatRef = collection(db, "Chats");
       const queryResult = query(
@@ -132,11 +132,12 @@ const HomeScreen = () => {
     };
 
     FetchMatch();
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
     if (!user) return;
+
+    setIsLoading(true);
 
     let avatarsArray = [];
     let latestMessage = [];
@@ -146,8 +147,9 @@ const HomeScreen = () => {
       const queryResult = query(FriendRef, where("username", "==", friend));
       const unsubFriend = onSnapshot(queryResult, (querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          const { profilePic } = doc.data();
-          avatarsArray.push({ name: friend, avatar: profilePic });
+          // console.log("doc.data() = ", doc.data());
+          const { profilePic, email } = doc.data();
+          avatarsArray.push({ name: friend, avatar: profilePic, email: email });
           setFriendAvatar([...avatarsArray]);
         });
       });
@@ -165,9 +167,10 @@ const HomeScreen = () => {
       const unsubChat = onSnapshot(queryResult2, (querySnapshot) => {
         querySnapshot.forEach((doc) => {
           const conversation = doc.data().conversation;
-          let lastMessage = "";
+          let lastMessage = [];
           if (conversation && conversation.length > 0) {
-            lastMessage = conversation[conversation.length - 1].message;
+            lastMessage = [conversation[conversation.length - 1]];
+            console.log("lastMessage sub 1 = ", lastMessage);
           }
           latestMessage.push({
             chatters: doc.data().chatters,
@@ -180,15 +183,17 @@ const HomeScreen = () => {
       const unsubChat2 = onSnapshot(queryResult3, (querySnapshot) => {
         querySnapshot.forEach((doc) => {
           const conversation = doc.data().conversation;
-          let lastMessage = "";
+          let lastMessage = [];
           if (conversation && conversation.length > 0) {
-            lastMessage = conversation[conversation.length - 1].message;
+            lastMessage = [conversation[conversation.length - 1]];
+            console.log("lastMessage sub 2 = ", lastMessage);
           }
           latestMessage.push({
             chatters: doc.data().chatters,
             message: lastMessage,
           });
           setLastMessage([...latestMessage]);
+          setIsLoading(false);
         });
       });
 
@@ -201,53 +206,47 @@ const HomeScreen = () => {
     return () => unsubscribe.forEach((unsub) => unsub());
   }, [friends]);
 
-  console.log("lastMessage = ", lastMessage);
+  // sort last message by timestamp knowing that it contains message, sender and timestamp
+  const sortLastMessage = (a, b) => {
+    const aTimestamp = a.message[0]?.timestamp || 0;
+    const bTimestamp = b.message[0]?.timestamp || 0;
+
+    return bTimestamp - aTimestamp;
+  };
+
+  const sortedLastMessage = lastMessage.sort(sortLastMessage);
+
+  console.log("sortedLastMessage = ", sortedLastMessage);
+  console.log("friend avatar = ", friendAvatar);
+
+  const combinedData = friendAvatar.map((friend) => {
+    const lastMessageData = sortedLastMessage.find((chat) =>
+      chat.chatters.includes(friend.name)
+    );
+    console.log("lastMessageData = ", lastMessageData);
+    return {
+      ...friend,
+      lastMessage: lastMessageData ? lastMessageData.message : "",
+    };
+  });
+
+  console.log("combinedData = ", combinedData);
 
   return (
     <>
       {isLoading ? (
         <View className="flex items-center justify-center h-full">
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#D44A00" />
         </View>
       ) : (
         <FlatList
-          data={friendAvatar}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("Chat", {
-                  friendName: item.name,
-                  friendAvatar: item.avatar,
-                })
-              }
-              className="mx-3"
-            >
-              <View className="flex-row items-center space-x-4 bg-white my-2 px-2 py-2 rounded-lg">
-                {friendAvatar !== null ? (
-                  <Image
-                    source={{ uri: item.avatar }}
-                    className="h-12 w-12 rounded-full"
-                  />
-                ) : (
-                  <Image
-                    source={userAvatar}
-                    className="h-12 w-12 rounded-full"
-                  />
-                )}
-                <View className="">
-                  <Text className="font-bold tracking-widest text-lg">
-                    {item.name}
-                  </Text>
-                  <Text className="text-gray-500 text-sm">
-                    {lastMessage.length > 0
-                      ? lastMessage.find((chat) =>
-                          chat.chatters.includes(item.name)
-                        )?.message
-                      : ""}
-                  </Text>
-                </View>
-              </View>
-            </TouchableOpacity>
+          data={combinedData.sort(
+            (a, b) =>
+              new Date(b.lastMessage[0].timestamp.seconds * 1000) -
+              new Date(a.lastMessage[0].timestamp.seconds * 1000)
+          )}
+          renderItem={({ item }) => (
+            <ChatItem navigation={navigation} friend={item} />
           )}
           keyExtractor={(item, index) => index.toString()}
         />

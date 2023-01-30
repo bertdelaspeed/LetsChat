@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "LetsChat",
+    "slug": "letschat1",
+    "version": "1.0.0",
+    "scheme": "com.bertdelaspeed.letschat",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.bertdelaspeed.letschat",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "apiKey": "process.env.API_KEY",
+      "authDomain": "process.env.AUTH_DOMAIN",
+      "projectId": "process.env.PROJECT_ID",
+      "storageBucket": "process.env.STORAGE_BUCKET",
+      "messagingSenderId": "process.env.MESSAGING_SENDER_ID",
+      "appId": "process.env.APP_ID",
+      "measurementId": "process.env.MEASUREMENT_ID",
+      "eas": {
+        "projectId": "0550c785-d4c6-45c5-b6a5-9634ee07bef9"
+      }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
+    ],
+    "owner": "bertdelaspeed "
+  }
+}
