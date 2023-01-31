@@ -20,6 +20,7 @@ import { db } from "../../firebase/config";
 const userAvatar = require("../../assets/man.png");
 import { Entypo } from "@expo/vector-icons";
 import ChatItem from "../components/ChatItem";
+import { combineData, sortLastMessage } from "../utils";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -170,7 +171,6 @@ const HomeScreen = () => {
           let lastMessage = [];
           if (conversation && conversation.length > 0) {
             lastMessage = [conversation[conversation.length - 1]];
-            console.log("lastMessage sub 1 = ", lastMessage);
           }
           latestMessage.push({
             chatters: doc.data().chatters,
@@ -186,7 +186,6 @@ const HomeScreen = () => {
           let lastMessage = [];
           if (conversation && conversation.length > 0) {
             lastMessage = [conversation[conversation.length - 1]];
-            console.log("lastMessage sub 2 = ", lastMessage);
           }
           latestMessage.push({
             chatters: doc.data().chatters,
@@ -206,31 +205,9 @@ const HomeScreen = () => {
     return () => unsubscribe.forEach((unsub) => unsub());
   }, [friends]);
 
-  // sort last message by timestamp knowing that it contains message, sender and timestamp
-  const sortLastMessage = (a, b) => {
-    const aTimestamp = a.message[0]?.timestamp || 0;
-    const bTimestamp = b.message[0]?.timestamp || 0;
-
-    return bTimestamp - aTimestamp;
-  };
-
   const sortedLastMessage = lastMessage.sort(sortLastMessage);
 
-  console.log("sortedLastMessage = ", sortedLastMessage);
-  console.log("friend avatar = ", friendAvatar);
-
-  const combinedData = friendAvatar.map((friend) => {
-    const lastMessageData = sortedLastMessage.find((chat) =>
-      chat.chatters.includes(friend.name)
-    );
-    console.log("lastMessageData = ", lastMessageData);
-    return {
-      ...friend,
-      lastMessage: lastMessageData ? lastMessageData.message : "",
-    };
-  });
-
-  console.log("combinedData = ", combinedData);
+  const combinedData = combineData(friendAvatar, sortedLastMessage);
 
   return (
     <>

@@ -18,10 +18,13 @@ import { addDoc, collection } from "firebase/firestore";
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
 
   const onHandleSignup = () => {
     if (email !== "" && password !== "") {
+      setIsLoading(true);
+
       createUserWithEmailAndPassword(auth, email, password)
         .then(
           async (res) =>
@@ -29,10 +32,11 @@ export default function Signup() {
               userId: res.user.uid,
               email: res.user.email,
               username: res.user.email.split("@")[0],
-            }),
-          navigation.navigate("Login")
+            })
         )
-        .catch((err) => Alert.alert("Login error", err.message));
+        .then(() => navigation.navigate("Login"))
+        .catch((err) => Alert.alert("Login error", err.message))
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -73,7 +77,7 @@ export default function Signup() {
           onPress={onHandleSignup}
         >
           <Text className="text-center font-semibold text-white text-lg ">
-            Register
+            {isLoading ? "Patienter..." : "S'inscrire"}
           </Text>
         </TouchableOpacity>
         <View className="flex-row space-x-2 justify-center">

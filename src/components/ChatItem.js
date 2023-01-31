@@ -2,8 +2,8 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 
 const ChatItem = ({ navigation, friend }) => {
-  console.log("navigation: ", navigation);
-  console.log("friend: ", friend);
+  //   console.log("navigation: ", navigation);
+  //   console.log("friend: ", friend);
   return (
     <TouchableOpacity
       onPress={() =>

@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StatusBar,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/config";
@@ -22,14 +21,6 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="gray" />
-      </View>
-    );
-  }
-
   const onHandleLogin = () => {
     if (email !== "" && password !== "") {
       setIsLoading(true);
@@ -37,10 +28,8 @@ export default function Login() {
         .then(() => {
           registerIndieID(`${email}`, 6054, "OLbw8pXPqXXjN0d24TdlsU");
         })
-        .catch(
-          (err) => Alert.alert("Login error", err.message),
-          setIsLoading(false)
-        );
+        .catch((err) => Alert.alert("Login error", err.message))
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -81,7 +70,7 @@ export default function Login() {
           onPress={onHandleLogin}
         >
           <Text className="text-center font-semibold text-white text-lg ">
-            Login
+            {isLoading ? "Patienter..." : "Login"}
           </Text>
         </TouchableOpacity>
         <View className="flex-row space-x-2 justify-center">

@@ -15,8 +15,6 @@ import SearchToChatScreen from "./src/screens/SearchToChatScreen";
 import ChatScreen from "./src/screens/ChatScreen";
 const loadingGif = require("./assets/loading.gif");
 
-import registerNNPushToken from "native-notify";
-
 const Stack = createNativeStackNavigator();
 
 function RootNavigator() {
@@ -80,7 +78,6 @@ function MainStack() {
 }
 
 export default function App() {
-  registerNNPushToken(6054, "OLbw8pXPqXXjN0d24TdlsU");
   return (
     <AuthenticatedUserProvider>
       <RootNavigator />

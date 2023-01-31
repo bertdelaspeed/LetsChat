@@ -27,7 +27,6 @@ import { useNavigation } from "@react-navigation/native";
 const ProfileScreen = () => {
   const storage = getStorage();
 
-  const [image, setImage] = useState(null);
   const [userImageUrl, setUserImageUrl] = useState(null);
   const [username, setUsername] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -37,6 +36,9 @@ const ProfileScreen = () => {
     AuthenticatedUserContext
   );
   const navigation = useNavigation();
+
+  const UserRef = collection(db, "Users");
+  const queryResult = query(UserRef, where("userId", "==", user.uid));
 
   async function DocFinder(queryResult) {
     const querySnapshot = await getDocs(queryResult);
@@ -58,7 +60,7 @@ const ProfileScreen = () => {
     const queryResult = query(UserRef, where("email", "==", user.email));
 
     DocFinder(queryResult);
-  }, [username, userImageUrl, image]);
+  }, [username, userImageUrl]);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -70,44 +72,36 @@ const ProfileScreen = () => {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
-
-      uploadImage();
+      uploadImage(result.assets[0].uri);
     }
   };
 
-  const uploadImage = async () => {
+  const uploadImage = async (image) => {
     try {
-      // console.log("inside upload image");
-
       setIsLoading(true);
       const response = await fetch(image);
       const blob = await response.blob();
-      const filename = image.substring(image.lastIndexOf("/") + 1);
+      const filename = image.substring(image.lastIndexOf("/"));
       // console.log("filename = " + filename);
       const imageRef = ref(storage, `ProfilePictures/${filename}`);
       uploadBytes(imageRef, blob).then(async () => {
-        // console.log("upload bytes");
         const downloadURL = await getDownloadURL(imageRef);
         // console.log("download url in UPLOAD Image = " + downloadURL);
-        setUserImageUrl(downloadURL);
-
-        const UserRef = collection(db, "Users");
-        const queryResult = query(UserRef, where("userId", "==", user.uid));
 
         const querySnapshot = await getDocs(queryResult);
-        querySnapshot.forEach((document) => {
-          updateDoc(doc(db, "Users", document.id), {
+        querySnapshot.forEach(async (document) => {
+          await updateDoc(doc(db, "Users", document.id), {
             profilePic: downloadURL,
           }).then(() => {
             setUserImageUrl(downloadURL);
             setUserAvatarUrl(downloadURL);
-            setIsLoading(false);
           });
         });
       });
     } catch (error) {
       Alert.alert(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -149,7 +143,6 @@ const ProfileScreen = () => {
           />
         )}
       </TouchableOpacity>
-      <View></View>
 
       <View className="items-center">
         <Text className="tracking-widest bg-gray-200 rounded-lg w-80 text-base py-2 px-1 mx-3 mb-5 text-slate-900 font-light">
