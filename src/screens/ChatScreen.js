@@ -27,11 +27,12 @@ import {
   where,
   onSnapshot,
 } from "firebase/firestore";
-import { db } from "../../firebase/config";
+import { chatsRef, db } from "../../firebase/config";
 import { AuthenticatedUserContext } from "../../Context/Authentication";
 import "firebase/firestore";
 const userAvatar = require("../../assets/man.png");
 import axios from "axios";
+import MessageItem from "../components/MessageItem";
 
 const ChatScreen = () => {
   const route = useRoute();
@@ -46,16 +47,16 @@ const ChatScreen = () => {
   const flatListRef = useRef(null);
   const [isListReady, setIsListReady] = useState(false);
 
+  const queryResult = query(
+    chatsRef,
+    where("chatters", "==", `${sender}xx${friendName}`)
+  );
+  const queryResult2 = query(
+    chatsRef,
+    where("chatters", "==", `${friendName}xx${sender}`)
+  );
+
   useEffect(() => {
-    const chatRef = collection(db, "Chats");
-    const queryResult = query(
-      chatRef,
-      where("chatters", "==", `${sender}xx${friendName}`)
-    );
-    const queryResult2 = query(
-      chatRef,
-      where("chatters", "==", `${friendName}xx${sender}`)
-    );
     const fetchMessages = async () => {
       const querySnapshot = await getDocs(queryResult);
       const querySnapshot2 = await getDocs(queryResult2);
@@ -129,15 +130,6 @@ const ChatScreen = () => {
 
   const handleSubmit = async () => {
     // console.log("submit button pressed");
-    const chatRef = collection(db, "Chats");
-    const queryResult = query(
-      chatRef,
-      where("chatters", "==", `${sender}xx${friendName}`)
-    );
-    const queryResult2 = query(
-      chatRef,
-      where("chatters", "==", `${friendName}xx${sender}`)
-    );
 
     const querySnapshot = await getDocs(queryResult);
     const querySnapshot2 = await getDocs(queryResult2);
@@ -209,31 +201,7 @@ const ChatScreen = () => {
             data={messages[0]}
             keyExtractor={(item) => item.timestamp}
             renderItem={({ item }) => (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent:
-                    item.sender === sender ? "flex-end" : "flex-start",
-                  padding: 10,
-                }}
-              >
-                <View
-                  style={{
-                    backgroundColor:
-                      item.sender === sender ? "#dcf8c6" : "#fff",
-                    padding: 10,
-                    borderRadius: 10,
-                    maxWidth: "80%",
-                    marginRight: 10,
-                    marginLeft: 10,
-                  }}
-                >
-                  <Text className="text-gray-500 text-sm ">{item.sender}</Text>
-                  <Text className="text-gray-700 text-base">
-                    {item.message}
-                  </Text>
-                </View>
-              </View>
+              <MessageItem item={item} sender={sender} />
             )}
           />
         )}

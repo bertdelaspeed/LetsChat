@@ -24,6 +24,8 @@ import { auth, db } from "../../firebase/config";
 import { signOut } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 
+const infiniteLoading = require("../../assets/infinity_loading.gif");
+
 const ProfileScreen = () => {
   const storage = getStorage();
 
@@ -95,12 +97,12 @@ const ProfileScreen = () => {
           }).then(() => {
             setUserImageUrl(downloadURL);
             setUserAvatarUrl(downloadURL);
+            setIsLoading(false);
           });
         });
       });
     } catch (error) {
       Alert.alert(error.message);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -119,7 +121,7 @@ const ProfileScreen = () => {
   // console.log("is loading = " + isLoading);
 
   return (
-    <ScrollView>
+    <View className="mt-10">
       <View className="justify-center items-center my-10">
         <Text className="text-2xl font-medium tracking-widest">
           Bienvenue,{" "}
@@ -156,7 +158,8 @@ const ProfileScreen = () => {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <Text>PATIENTER ...</Text>
+          {/* <Text>PATIENTER ...</Text> */}
+          <Image source={infiniteLoading} className="h-20 w-20" />
         </View>
       )}
       <View>
@@ -169,7 +172,7 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 

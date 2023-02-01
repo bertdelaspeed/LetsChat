@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   TouchableOpacity,
   Image,
   FlatList,
@@ -9,14 +8,8 @@ import {
 import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { AuthenticatedUserContext } from "../../Context/Authentication";
 import { useNavigation } from "@react-navigation/native";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  onSnapshot,
-} from "firebase/firestore";
-import { db } from "../../firebase/config";
+import { getDocs, query, where, onSnapshot } from "firebase/firestore";
+import { chatsRef, usersRef } from "../../firebase/config";
 const userAvatar = require("../../assets/man.png");
 import { Entypo } from "@expo/vector-icons";
 import ChatItem from "../components/ChatItem";
@@ -39,20 +32,19 @@ const HomeScreen = () => {
     navigation.navigate("Profile");
   }
 
-  async function DocFinder(queryResult) {
-    const querySnapshot = await getDocs(queryResult);
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      const { profilePic } = doc.data();
-      setUserAvatarUrl(profilePic);
-    });
-  }
-
   useEffect(() => {
     if (!user) return;
 
-    const UserRef = collection(db, "Users");
-    const queryResult = query(UserRef, where("userId", "==", user.uid));
+    const queryResult = query(usersRef, where("userId", "==", user.uid));
+
+    async function DocFinder(queryResult) {
+      const querySnapshot = await getDocs(queryResult);
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        const { profilePic } = doc.data();
+        setUserAvatarUrl(profilePic);
+      });
+    }
 
     DocFinder(queryResult);
   }, []);
@@ -79,16 +71,15 @@ const HomeScreen = () => {
   useEffect(() => {
     if (!user) return;
 
-    const FetchMatch = async () => {
-      const chatRef = collection(db, "Chats");
+    const FetchLoggedUserChats = async () => {
       const queryResult = query(
-        chatRef,
+        chatsRef,
         where("chatters", ">=", `${username}`),
         where("chatters", "<=", `${username}` + "\uf8ff")
       );
 
       const queryResult2 = query(
-        chatRef,
+        chatsRef,
         where("chatters", "<=", `xx${username}`)
       );
 
@@ -132,7 +123,7 @@ const HomeScreen = () => {
       };
     };
 
-    FetchMatch();
+    FetchLoggedUserChats();
   }, []);
 
   useEffect(() => {
@@ -142,10 +133,8 @@ const HomeScreen = () => {
 
     let avatarsArray = [];
     let latestMessage = [];
-    const FriendRef = collection(db, "Users");
-    const ChatsRef = collection(db, "Chats");
     const unsubscribe = friends.map((friend) => {
-      const queryResult = query(FriendRef, where("username", "==", friend));
+      const queryResult = query(usersRef, where("username", "==", friend));
       const unsubFriend = onSnapshot(queryResult, (querySnapshot) => {
         querySnapshot.forEach((doc) => {
           // console.log("doc.data() = ", doc.data());
@@ -156,12 +145,12 @@ const HomeScreen = () => {
       });
 
       const queryResult2 = query(
-        ChatsRef,
+        chatsRef,
         where("chatters", "==", `${username}xx${friend}`)
       );
 
       const queryResult3 = query(
-        ChatsRef,
+        chatsRef,
         where("chatters", "==", `${friend}xx${username}`)
       );
 
@@ -225,7 +214,7 @@ const HomeScreen = () => {
           renderItem={({ item }) => (
             <ChatItem navigation={navigation} friend={item} />
           )}
-          keyExtractor={(item, index) => index.toString()}
+          // keyExtractor={(item, index) => index.toString()}
         />
       )}
       <View className="flex flex-row-reverse absolute bottom-14 right-5">
