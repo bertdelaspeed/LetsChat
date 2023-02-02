@@ -18,13 +18,18 @@ import { addDoc, collection } from "firebase/firestore";
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
 
   const onHandleSignup = () => {
     if (email !== "" && password !== "") {
-      setIsLoading(true);
+      if (password !== password2) {
+        Alert.alert("Error", "Passwords do not match");
+        return;
+      }
 
+      setIsLoading(true);
       createUserWithEmailAndPassword(auth, email, password)
         .then(
           async (res) =>
@@ -34,12 +39,12 @@ export default function Signup() {
               username: res.user.email.split("@")[0],
             })
         )
-        .then(() => navigation.navigate("Login"))
-        .catch((err) => Alert.alert("Login error", err.message))
-        .finally(() => setIsLoading(false));
+        .then(() => setEmail(""), setPassword(""), navigation.navigate("Login"))
+        .catch((err) => Alert.alert("Login error", err.message));
+      setIsLoading(false);
     }
   };
-
+  console.log("isloading = ", isLoading);
   return (
     <KeyboardAwareScrollView className="bg-black">
       <View>
@@ -71,6 +76,16 @@ export default function Signup() {
             value={password}
             onChangeText={(text) => setPassword(text)}
           />
+          <TextInput
+            className="tracking-widest bg-gray-100 rounded-lg w-80 text-base py-2 px-1 mx-3 mb-1"
+            placeholder="Confirm password"
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry={true}
+            textContentType="password"
+            value={password2}
+            onChangeText={(text) => setPassword2(text)}
+          />
         </View>
         <TouchableOpacity
           className="bg-[#fac25a] py-2 rounded-md mx-10 mt-16 mb-3"
@@ -90,7 +105,7 @@ export default function Signup() {
         </View>
       </View>
 
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
     </KeyboardAwareScrollView>
   );
 }

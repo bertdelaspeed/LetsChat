@@ -176,22 +176,25 @@ const ChatScreen = () => {
       });
     }
 
-    axios.post(`https://app.nativenotify.com/api/indie/notification`, {
-      subID: `${friendEmail}`,
-      appId: 6054,
-      appToken: "OLbw8pXPqXXjN0d24TdlsU",
-      title: `${sender} - LetsChat`,
-      message: `${message}`,
-    });
+    axios
+      .post(`https://app.nativenotify.com/api/indie/notification`, {
+        subID: `${friendEmail}`,
+        appId: 6054,
+        appToken: "OLbw8pXPqXXjN0d24TdlsU",
+        title: `${sender} - LetsChat`,
+        message: `${message}`,
+      })
+      .catch((err) => console.log("do nothing"));
+
     setMessage("");
   };
 
   return (
     <View>
-      <View className="mb-20">
+      <View className="h-[90%]">
         {messages[0] !== undefined && (
           <FlatList
-            initialNumToRender={5}
+            initialNumToRender={10}
             ref={flatListRef}
             onContentSizeChange={() => {
               if (isListReady) {
@@ -206,7 +209,7 @@ const ChatScreen = () => {
           />
         )}
       </View>
-      <View className="flex-row mb-5 items-center mx-3 space-x-3 absolute bottom-0">
+      <View className="flex-row items-center mx-3 space-x-3 h-[10%] -mb-3">
         <TextInput
           className="bg-white rounded-xl p-2 flex-1 focus:outline-none focus:shadow-outline-blue text-gray-700 h-12"
           placeholder="Type your message here..."

@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  StatusBar,
+  FlatList,
 } from "react-native";
 import React, { useState } from "react";
 import { SimpleLineIcons } from "@expo/vector-icons";
@@ -19,14 +21,12 @@ const SearchToChatScreen = () => {
 
   const [searchFriend, setSearchFriend] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [searchedFriendAvatar, setSearchedFriendAvatar] = useState(null);
-  const [searchedFriendName, setSearchedFriendName] = useState(null);
+  const [searchedFriendName, setSearchedFriendName] = useState([]);
   const [found, setFound] = useState(false);
 
   const HandleSearch = async () => {
     if (searchFriend !== "") {
-      setSearchedFriendAvatar(null);
-      setSearchedFriendName(null);
+      setSearchedFriendName([]);
 
       setIsLoading(true);
       // console.log(searchFriend);
@@ -40,13 +40,13 @@ const SearchToChatScreen = () => {
 
       // console.log("result = " + querySnapshot.empty);
       if (!querySnapshot.empty) {
+        let friends = [];
         querySnapshot.forEach((document) => {
           const { profilePic, username } = document.data();
-
-          setSearchedFriendAvatar(profilePic);
-          setSearchedFriendName(username);
-          setFound(true);
+          friends.push({ profilePic, username });
         });
+        setSearchedFriendName(friends);
+        setFound(true);
       } else {
         setFound(false);
       }
@@ -77,29 +77,41 @@ const SearchToChatScreen = () => {
       </View>
       {isLoading && <ActivityIndicator size={"large"} color="gray" />}
       {found ? (
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("Chat", {
-              friendName: searchedFriendName,
-              friendAvatar: searchedFriendAvatar,
-            })
-          }
-          className="mx-6"
-        >
-          <View className="flex-row items-center space-x-4 bg-gray-100 px-2 py-2 rounded-lg">
-            {searchedFriendAvatar !== undefined ? (
-              <Image
-                source={{ uri: searchedFriendAvatar }}
-                className="h-12 w-12 rounded-full"
-              />
-            ) : (
-              <Image source={userAvatar} className="h-12 w-12 rounded-full" />
+        <View className="mx-6">
+          <FlatList
+            data={searchedFriendName}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item) => item.username}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Chat", {
+                    friendName: item.username,
+                    friendAvatar: item.profilePic,
+                  })
+                }
+                className="mx-3 my-[5px]"
+              >
+                <View className="flex-row items-center space-x-4 bg-gray-100 px-2 py-2 rounded-lg">
+                  {item.profilePic !== undefined ? (
+                    <Image
+                      source={{ uri: item.profilePic }}
+                      className="h-12 w-12 rounded-full"
+                    />
+                  ) : (
+                    <Image
+                      source={userAvatar}
+                      className="h-12 w-12 rounded-full"
+                    />
+                  )}
+                  <Text className="font-bold tracking-widest text-lg">
+                    {item.username}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             )}
-            <Text className="font-bold tracking-widest text-lg">
-              {searchedFriendName}
-            </Text>
-          </View>
-        </TouchableOpacity>
+          />
+        </View>
       ) : (
         <View className="mx-6 items-center">
           {!found && (
@@ -110,6 +122,7 @@ const SearchToChatScreen = () => {
           )}
         </View>
       )}
+      <StatusBar barStyle="dark-content" />
     </View>
   );
 };

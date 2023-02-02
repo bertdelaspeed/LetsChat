@@ -4,6 +4,7 @@ import {
   Image,
   FlatList,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { AuthenticatedUserContext } from "../../Context/Authentication";
@@ -72,6 +73,7 @@ const HomeScreen = () => {
     if (!user) return;
 
     const FetchLoggedUserChats = async () => {
+      setIsLoading(true);
       const queryResult = query(
         chatsRef,
         where("chatters", ">=", `${username}`),
@@ -86,6 +88,7 @@ const HomeScreen = () => {
       let friendsArray = [];
 
       const unsubscribe = onSnapshot(queryResult, (querySnapshot) => {
+        setIsLoading(false);
         querySnapshot.forEach((doc) => {
           // doc.data() is never undefined for query doc snapshots
           if (doc.data().chatters.includes(username)) {
@@ -104,6 +107,7 @@ const HomeScreen = () => {
       });
 
       const unsubscribe2 = onSnapshot(queryResult2, (querySnapshot2) => {
+        setIsLoading(false);
         querySnapshot2.forEach((doc) => {
           // doc.data() is never undefined for query doc snapshots
           if (doc.data().chatters.includes(username)) {
@@ -112,7 +116,6 @@ const HomeScreen = () => {
             friendsArray.push(friends);
             friendsArray = [...new Set(friendsArray)];
             setFriends(friendsArray);
-            // console.log("friends in sub2 = ", friends);
           }
         });
       });
@@ -128,8 +131,6 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (!user) return;
-
-    setIsLoading(true);
 
     let avatarsArray = [];
     let latestMessage = [];
@@ -181,7 +182,7 @@ const HomeScreen = () => {
             message: lastMessage,
           });
           setLastMessage([...latestMessage]);
-          setIsLoading(false);
+          // console.log("lastMessage = ", lastMessage);
         });
       });
 
@@ -198,6 +199,7 @@ const HomeScreen = () => {
 
   const combinedData = combineData(friendAvatar, sortedLastMessage);
 
+  console.log("combinedData = ", combinedData);
   return (
     <>
       {isLoading ? (
@@ -208,8 +210,8 @@ const HomeScreen = () => {
         <FlatList
           data={combinedData.sort(
             (a, b) =>
-              new Date(b.lastMessage[0].timestamp.seconds * 1000) -
-              new Date(a.lastMessage[0].timestamp.seconds * 1000)
+              new Date(b.lastMessage[0]?.timestamp?.seconds * 1000) -
+              new Date(a.lastMessage[0]?.timestamp?.seconds * 1000)
           )}
           renderItem={({ item }) => (
             <ChatItem navigation={navigation} friend={item} />
@@ -226,6 +228,7 @@ const HomeScreen = () => {
             <Entypo name="chat" size={30} color="white" />
           </TouchableOpacity>
         </View>
+        <StatusBar barStyle="dark-content" />
       </View>
     </>
   );

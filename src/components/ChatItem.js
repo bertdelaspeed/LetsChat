@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
+const userAvatar = require("../../assets/man.png");
 
 const ChatItem = ({ navigation, friend }) => {
   //   console.log("navigation: ", navigation);
@@ -16,7 +17,7 @@ const ChatItem = ({ navigation, friend }) => {
       className="mx-3"
     >
       <View className="flex-row items-center space-x-4 bg-white my-2 px-2 py-2 rounded-lg">
-        {friend.avatar !== null ? (
+        {friend.avatar !== undefined ? (
           <Image
             source={{ uri: friend.avatar }}
             className="h-12 w-12 rounded-full"

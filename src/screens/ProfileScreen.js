@@ -4,8 +4,8 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  ScrollView,
   Alert,
+  StatusBar,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -23,8 +23,6 @@ import {
 import { auth, db } from "../../firebase/config";
 import { signOut } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
-
-const infiniteLoading = require("../../assets/infinity_loading.gif");
 
 const ProfileScreen = () => {
   const storage = getStorage();
@@ -121,7 +119,7 @@ const ProfileScreen = () => {
   // console.log("is loading = " + isLoading);
 
   return (
-    <View className="mt-10">
+    <View>
       <View className="justify-center items-center my-10">
         <Text className="text-2xl font-medium tracking-widest">
           Bienvenue,{" "}
@@ -154,14 +152,15 @@ const ProfileScreen = () => {
           {userEmail}
         </Text>
       </View>
+
       {isLoading && (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          {/* <Text>PATIENTER ...</Text> */}
-          <Image source={infiniteLoading} className="h-20 w-20" />
+        <View>
+          <Text className="text-lg text-center tracking-widest">
+            Patienter ...
+          </Text>
         </View>
       )}
+
       <View>
         <TouchableOpacity
           onPress={HandleSignOut}
@@ -172,6 +171,7 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity>
       </View>
+      <StatusBar barStyle="dark-content" />
     </View>
   );
 };

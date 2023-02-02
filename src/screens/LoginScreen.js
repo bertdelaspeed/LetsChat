@@ -38,7 +38,7 @@ export default function Login() {
       <View>
         <Image source={backImage} className={`object-cover h-80 w-full`} />
       </View>
-      <View className="bg-white flex-1 h-screen rounded-t-3xl ">
+      <View className="bg-white h-screen rounded-t-3xl ">
         <Text className="text-[#d60e45] text-3xl font-semibold text-center py-3 mt-3">
           Se connecter
         </Text>
@@ -83,7 +83,7 @@ export default function Login() {
         </View>
       </View>
 
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
     </KeyboardAwareScrollView>
   );
 }

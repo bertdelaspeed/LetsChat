@@ -25,12 +25,12 @@ function RootNavigator() {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
+        setIsLoading(false);
       } else {
-        // console.log("out !");
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
-  }, [user]);
+  }, []);
 
   return (
     <NavigationContainer>
