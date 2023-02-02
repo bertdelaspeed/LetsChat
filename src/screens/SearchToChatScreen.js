@@ -85,7 +85,7 @@ const SearchToChatScreen = () => {
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate("Chat", {
+                  navigation.replace("Chat", {
                     friendName: item.username,
                     friendAvatar: item.profilePic,
                   })

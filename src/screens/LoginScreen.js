@@ -14,6 +14,7 @@ const backImage = require("../../assets/background_signin.jpg");
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
 import { registerIndieID } from "native-notify";
+import { processAuthError } from "../utils";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -28,7 +29,7 @@ export default function Login() {
         .then(() => {
           registerIndieID(`${email}`, 6054, "OLbw8pXPqXXjN0d24TdlsU");
         })
-        .catch((err) => Alert.alert("Login error", err.message))
+        .catch((err) => processAuthError(err))
         .finally(() => setIsLoading(false));
     }
   };

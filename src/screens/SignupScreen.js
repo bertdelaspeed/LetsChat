@@ -14,6 +14,7 @@ const backImage = require("../../assets/background_signup.jpg");
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
 import { addDoc, collection } from "firebase/firestore";
+import { processAuthError } from "../utils";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -39,8 +40,8 @@ export default function Signup() {
               username: res.user.email.split("@")[0],
             })
         )
-        .then(() => setEmail(""), setPassword(""), navigation.navigate("Login"))
-        .catch((err) => Alert.alert("Login error", err.message));
+        .then(() => setEmail(""), setPassword(""))
+        .catch((err) => processAuthError(err));
       setIsLoading(false);
     }
   };

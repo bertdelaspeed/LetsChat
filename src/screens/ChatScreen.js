@@ -176,15 +176,43 @@ const ChatScreen = () => {
       });
     }
 
-    axios
-      .post(`https://app.nativenotify.com/api/indie/notification`, {
-        subID: `${friendEmail}`,
-        appId: 6054,
-        appToken: "OLbw8pXPqXXjN0d24TdlsU",
-        title: `${sender} - LetsChat`,
-        message: `${message}`,
-      })
-      .catch((err) => console.log("do nothing"));
+    // axios
+    //   .post(`https://app.nativenotify.com/api/indie/notification`, {
+    //     subID: `${friendEmail}`,
+    //     appId: 6054,
+    //     appToken: "OLbw8pXPqXXjN0d24TdlsU",
+    //     title: `${sender} - LetsChat`,
+    //     message: `${message}`,
+    //   })
+    //   .then(() => console.log("notification success !!"))
+    //   .catch((err) => console.log("do nothing : ", err));
+
+    async function retryRequest(maxRetries = 3) {
+      let retries = 0;
+
+      while (retries < maxRetries) {
+        try {
+          const response = await axios.post(
+            `https://app.nativenotify.com/api/indie/notification`,
+            {
+              subID: `${friendEmail}`,
+              appId: 6054,
+              appToken: "OLbw8pXPqXXjN0d24TdlsU",
+              title: `${sender} - LetsChat`,
+              message: `${message}`,
+            }
+          );
+
+          console.log("notification success !!");
+          return response;
+        } catch (error) {
+          console.log("Request failed, retrying...");
+          retries++;
+        }
+      }
+    }
+
+    retryRequest();
 
     setMessage("");
   };

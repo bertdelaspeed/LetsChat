@@ -199,7 +199,7 @@ const HomeScreen = () => {
 
   const combinedData = combineData(friendAvatar, sortedLastMessage);
 
-  console.log("combinedData = ", combinedData);
+  // console.log("combinedData = ", combinedData);
   return (
     <>
       {isLoading ? (
